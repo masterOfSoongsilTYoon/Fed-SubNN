@@ -105,10 +105,10 @@ class ProposedServer(fl.server.strategy.FedAvg):
             # only_params = [parameters_to_ndarrays(fit_res.parameters)
             #     for _, fit_res in results]
             aggregated_ndarrays = aggregate(weights_results)
-        main_ndarrays = list(map(lambda x: x.cpu().detach().numpy(), self.main_net.parameters()))
-        DV = [sp-mp for sp, mp in zip(aggregated_ndarrays,main_ndarrays)]
+        main_ndarrays = {k:v.cpu().detach().numpy() for k, v in self.main_net.state_dict().items()}
+        DV = [sp-mp for sp, mp in zip(aggregated_ndarrays, main_ndarrays.values())]
         
-        similar = cosine_similarity_cal(zip(parameter_to_Ndarrays(aggregated_ndarrays), parameter_to_Ndarrays(main_ndarrays)))
+        similar = cosine_similarity_cal(zip(parameter_to_Ndarrays(aggregated_ndarrays), parameter_to_Ndarrays(main_ndarrays.values())))
         
         between.append(sum(similar)/len(similar))
 

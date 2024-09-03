@@ -5,3 +5,4 @@ Models
 Plot
 *.txt
 CosineClusteredFedAvgServer.py
+*.ipynb
