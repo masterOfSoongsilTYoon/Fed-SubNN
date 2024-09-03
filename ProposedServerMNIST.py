@@ -104,10 +104,10 @@ class ProposedServer(fl.server.strategy.FedAvg):
             # only_params = [parameters_to_ndarrays(fit_res.parameters)
             #     for _, fit_res in results]
             aggregated_ndarrays = aggregate(weights_results)
-        main_ndarrays = list(map(lambda x: x.cpu().detach().numpy(), self.main_net.parameters()))
-        DV = [sp-mp for sp, mp in zip(aggregated_ndarrays,main_ndarrays)]
+        main_ndarrays = {k:v.cpu().detach().numpy() for k, v in self.main_net.state_dict().items()}
+        DV = [sp-mp for sp, mp in zip(aggregated_ndarrays, main_ndarrays.values())]
         
-        similar = cosine_similarity_cal(zip(parameter_to_Ndarrays(aggregated_ndarrays), parameter_to_Ndarrays(main_ndarrays)))
+        similar = cosine_similarity_cal(zip(parameter_to_Ndarrays(aggregated_ndarrays), parameter_to_Ndarrays(main_ndarrays.values())))
         
         between.append(sum(similar)/len(similar))
 
@@ -133,7 +133,11 @@ if __name__=="__main__":
     main_model = ResNet152C()
     if args.pretrained is not None:
         main_model.load_state_dict(torch.load(args.pretrained, weights_only=True))
-    history=fl.server.start_server(server_address="[::]:8084", grpc_max_message_length=1024*1024*1024, strategy=ProposedServer(main_model=main_model, omega=args.omega ,evaluate_fn = fl_evaluate,inplace=False, min_fit_clients=4, min_available_clients=4, min_evaluate_clients=4), 
+    if args.test:
+        history=fl.server.start_server(server_address="[::]:8084", grpc_max_message_length=1024*1024*1024, strategy=ProposedServer(main_model=main_model, omega=args.omega ,evaluate_fn = fl_save, inplace=True, min_fit_clients=1, min_available_clients=1, min_evaluate_clients=1), 
+                        config=fl.server.ServerConfig(num_rounds=args.round))
+    else:
+        history=fl.server.start_server(server_address="[::]:8084", grpc_max_message_length=1024*1024*1024, strategy=ProposedServer(main_model=main_model, omega=args.omega ,evaluate_fn = fl_evaluate, inplace=True, min_fit_clients=5, min_available_clients=5, min_evaluate_clients=5), 
                         config=fl.server.ServerConfig(num_rounds=args.round))
     loss_frame=pd.DataFrame({"Loss": list(map(lambda x: x[1] , history.losses_centralized))})
     loss_frame.plot(color='red').figure.savefig(f"./Plot/{args.version}_loss.png")
