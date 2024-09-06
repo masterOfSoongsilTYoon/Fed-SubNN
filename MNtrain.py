@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 import random
 import os
-
+from tqdm import tqdm
 def make_model_folder(dir):
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -21,8 +21,8 @@ def train(net, train_loader, valid_loader, epoch, lossf, optimizer, DEVICE, save
     history = {'loss': [], 'acc': [], 'precision': [], 'f1score': [], "recall": []}
     for e in range(epoch):
         net.train()
-        for b ,sample in enumerate(train_loader):
-            print(f"{b+1} batch start")
+        for sample in tqdm(train_loader,desc="Train: "):
+            # print(f"{b+1} batch start")
             X= torch.stack([s["x"] for s in sample], 0)
             Y= torch.IntTensor([s["label"] for s in sample])
             
@@ -36,7 +36,7 @@ def train(net, train_loader, valid_loader, epoch, lossf, optimizer, DEVICE, save
         
         if valid_loader is not None:
             net.eval()
-            print("valid start")
+            # print("valid start")
             with torch.no_grad():
                 for key, value in valid(net, valid_loader, e, lossf, DEVICE).items():
                     history[key].append(value)
@@ -52,8 +52,9 @@ def valid(net, valid_loader, e, lossf, DEVICE):
     precision=0
     f1score=0
     recall=0
-    for b ,sample in enumerate(valid_loader):
-        print(f"valid {b+1} batch start")
+    length = len(valid_loader)+1e-7
+    for sample in tqdm(valid_loader, desc="Validation: "):
+        # print(f"valid {b+1} batch start")
         X= torch.stack([s["x"] for s in sample], 0)
         Y= torch.IntTensor([s["label"] for s in sample])
         
@@ -66,9 +67,9 @@ def valid(net, valid_loader, e, lossf, DEVICE):
         f1score += f1_score(Y.cpu().squeeze().detach().numpy(), out.cpu().squeeze().detach().numpy(), average="macro")
         recall += recall_score(Y.cpu().squeeze().detach().numpy(), out.cpu().squeeze().detach().numpy(), average="macro")
     if e is not None:
-        print(f"Result epoch {e+1}: loss:{loss.item(): .4f} acc:{acc/(b+1): .4f} precision:{precision/(b+1): .4f} f1score:{f1score/(b+1): .4f} recall: {recall/(b+1): .4f}")
+        print(f"Result epoch {e+1}: loss:{loss.item(): .4f} acc:{acc/length: .4f} precision:{precision/length: .4f} f1score:{f1score/length: .4f} recall: {recall/length: .4f}")
         
-    return {'loss': loss.item(), 'acc': acc/(b+1), 'precision': precision/(b+1), 'f1score': f1score/(b+1), "recall": recall/(b+1)}
+    return {'loss': loss.item(), 'acc': acc/length, 'precision': precision/length, 'f1score': f1score/length, "recall": recall/length}
 
 if __name__=="__main__":
     warnings.filterwarnings("ignore")

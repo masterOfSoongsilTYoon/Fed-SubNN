@@ -12,7 +12,8 @@ from Network import *
 
 import os
 import pandas as pd
-
+import numpy as np
+import random
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 args = Federatedparser()
 
@@ -22,8 +23,8 @@ eval_loader = DataLoader(eval_data, batch_size=args.batch_size, shuffle=False, c
 lossf = nn.CrossEntropyLoss()
 net = ResNet152C()
 net.double()
-if args.pretrained is not None:
-        net.load_state_dict(torch.load(args.pretrained))
+# if args.pretrained is not None:
+#         net.load_state_dict(torch.load(args.pretrained))
 net.to(DEVICE)
 
 def set_parameters(net, parameters):
@@ -47,6 +48,13 @@ def fl_save(server_round:int, parameters: fl.common.NDArrays, config:Dict[str, f
 if __name__=="__main__":
     warnings.filterwarnings("ignore")
     make_model_folder(f"./Models/{args.version}")
+
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+    
     history=fl.server.start_server(server_address="[::]:8084",grpc_max_message_length=1024*1024*1024,strategy=fl.server.strategy.FedAvg(evaluate_fn = fl_evaluate,inplace=False, min_fit_clients=5, min_available_clients=5, min_evaluate_clients=5), 
                            config=fl.server.ServerConfig(num_rounds=args.round))
     

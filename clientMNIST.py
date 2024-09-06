@@ -43,8 +43,7 @@ class FedAvgClient(fl.client.NumPyClient):
         # history = self.valid(self.net, self.valid_loader, None, lossf=self.lossf, DEVICE=self.DEVICE)
         # return history["loss"], len(self.valid_loader), {key:value for key, value in history.items() if key != "loss" }
         # return 1.0, 0, {"accuracy":0.95}
-async def start_client_async(server_address, client):
-    await fl.client.start_client(server_address=server_address, client= client)
+
 
 if __name__ =="__main__":
     warnings.filterwarnings("ignore")

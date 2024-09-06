@@ -37,7 +37,7 @@ args = Federatedparser()
 eval_data = MNistDataset(train=False)
 eval_loader = DataLoader(eval_data, batch_size=args.batch_size, shuffle=False, collate_fn= lambda x:x)
 
-lossf = nn.CrossEntropyLoss()
+lossf = nn.CrossEntropyLoss().to(DEVICE)
 net = ResNet152C()
 net.double()
 net.to(DEVICE)

@@ -23,14 +23,13 @@ def Federatedparser():
     parser.add_argument("-v", "--version", type= str, default="default")
     parser.add_argument("-s", "--seed", type= int, default= 2024)
     parser.add_argument("-r", "--round", type= int, default=10)
-    parser.add_argument("-e", "--epoch", type= int, default= 3)
+    parser.add_argument("-e", "--epoch", type= int, default= 2)
     parser.add_argument("-i", "--id", type= int, default=1)
     parser.add_argument("-bs", "--batch-size", type= int, default=1)
     parser.add_argument("-p", "--pretrained", type= str, default=None)
-    parser.add_argument("-w", "--wesad_path", type= str, default=None)
     parser.add_argument("-t", "--test", type= bool, default=False)
-    parser.add_argument("-m", "--mode", type= str, default="max")
     parser.add_argument("-o", "--omega", type= float, default= 0.5)
+    parser.add_argument("-n", "--noise", type= bool, default=False)
     args = parser.parse_args()
     return args
 
