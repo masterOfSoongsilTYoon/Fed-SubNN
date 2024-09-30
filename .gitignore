@@ -6,3 +6,4 @@ Plot
 *.txt
 CosineClusteredFedAvgServer.py
 *.ipynb
+*.png

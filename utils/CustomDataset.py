@@ -57,7 +57,7 @@ class WESADDataset(object):
 class MNistDataset(object):
     def __init__(self, train: bool, noise=False) -> None:
         if noise:
-            self.transform = Compose([ToTensor(), Normalize((0.1307,), (0.3081,)), GaussianNoise()])
+            self.transform = Compose([ToTensor(), Normalize((0.1307,), (0.3081,)), GaussianNoise(sigma=0.7)])
         else:
             self.transform = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
         self.MNist = MNIST(root="./MNIST", train=train, download=True, transform=self.transform)
